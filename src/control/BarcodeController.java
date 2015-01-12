@@ -3,6 +3,7 @@ package control;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +27,9 @@ import ui.BarcodeView;
 
 /**
  * Controls preparation and creation of barcode files
+ * 
  * @author Andreas Friedrich
- *
+ * 
  */
 
 public class BarcodeController {
@@ -67,7 +69,7 @@ public class BarcodeController {
       public void buttonClick(ClickEvent event) {
         String src = event.getButton().getCaption();
         if (src.equals("Download Sample Sheet")) {
-           creator.createAndDLSheet(barcodeBeans, view.getSorter());
+          creator.createAndDLSheet(barcodeBeans, view.getSorter());
         }
         if (src.equals("Download Tube Barcodes")) {
           creator.zipAndDownloadBarcodes(barcodeBeans);
@@ -192,13 +194,18 @@ public class BarcodeController {
 
   protected ArrayList<IBarcodeBean> translateBeans(Collection<NewSampleModelBean> samples) {
     List<Sample> samplePool = openbis.getSamplesOfProject(view.getProjectCode());
-    Map<String, ArrayList<String>> parentMap = openbis.getParentMap(samplePool);
+    Map<String, Sample> sampleMap = new HashMap<String, Sample>();
+    for (Sample s : samplePool) {
+      sampleMap.put(s.getCode(), s);
+    }
+    Map<Sample, List<Sample>> parentMap = openbis.getParentMap(samplePool);
     ArrayList<IBarcodeBean> res = new ArrayList<IBarcodeBean>();
     for (NewSampleModelBean s : samples) {
-      res.add(new NewModelBarcodeBean(s.getCode(), s.getSecondary_Name(), s.getType(), parentMap
-          .get(s.getCode())));
+      List<String> parents = new ArrayList<String>();
+      for (Sample p : parentMap.get(sampleMap.get(s.getCode())))
+        parents.add(p.getCode());
+      res.add(new NewModelBarcodeBean(s.getCode(), s.getSecondary_Name(), s.getType(), parents));
     }
     return res;
   }
-
 }

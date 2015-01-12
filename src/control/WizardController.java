@@ -44,7 +44,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Upload.FinishedEvent;
 import com.vaadin.ui.Upload.FinishedListener;
 
-import ui.CreateDataStep;
 import ui.EntityStep;
 import ui.ExtractionStep;
 import ui.FactorStep;
@@ -56,8 +55,9 @@ import properties.Factor;
 
 /**
  * Controller for the sample/experiment creation wizard
+ * 
  * @author Andreas Friedrich
- *
+ * 
  */
 public class WizardController {
 
@@ -78,7 +78,7 @@ public class WizardController {
    * 
    * @param openbis OpenBisClient API
    * @param taxMap Map containing the NCBI taxonomy (labels and ids) taken from openBIS
-   * @param tissueMap Map containing the tissue 
+   * @param tissueMap Map containing the tissue
    * @param sampleTypes List containing the different sample (technology) types
    * @param spaces List of space names existing in openBIS
    */
@@ -92,45 +92,62 @@ public class WizardController {
     this.spaces = spaces;
   }
 
-  private void skipToUpload() {
-    w.addStep(steps.get(9)); // tsv upload and registration
+  private void setUpLoadStep() {
+    System.out.println("add tsv step");
+    w.addStep(steps.get(8)); // tsv upload and registration
+    System.out.println(w.getSteps().size() + " steps");
   }
 
   private void setInheritEntities() {
+    System.out.println("add entity negative selection and extract creation");
     w.addStep(steps.get(3)); // entity negative selection
     w.addStep(steps.get(4)); // extract first step
     setInheritExtracts();
   }
 
   private void setInheritExtracts() {
+    System.out.println("add extract neg selection and test samples");
     w.addStep(steps.get(6)); // extracts negative selection
     w.addStep(steps.get(7)); // test samples first step
-    setLastSteps();
+    setUpLoadStep();
   }
 
   private void setCreateEntities() {
+    System.out.println("add create entities");
     w.addStep(steps.get(1)); // entities first step
     setInheritEntities();
   }
 
   private void setEntityConditions() {
+    System.out.println("add entity conditions");
     w.addStep(steps.get(2)); // entity conditions
     setInheritEntities();
   }
 
   private void setExtractConditions() {
+    System.out.println("add extract conditions");
     w.addStep(steps.get(5)); // extract conditions
     setInheritExtracts();
   }
 
-  private void setLastSteps() {
-    w.addStep(steps.get(8));
-    w.addStep(steps.get(9));
-  }
-
   private void resetNextSteps() {
-    for (int i = lastStep; i < steps.size(); i++)
-      w.removeStep(steps.get(i));
+    List<WizardStep> steps = w.getSteps();
+    List<WizardStep> copy = new ArrayList<WizardStep>();
+    copy.addAll(steps);
+    System.out.println(steps.size() + " steps in wizard");
+    boolean isNew = false;
+    for (int i = 0; i < copy.size(); i++) {
+      WizardStep cur = copy.get(i);
+      System.out.println(cur + " active " + w.isActive(cur));
+      if (isNew) {
+        System.out.println(cur + " removed");
+        w.removeStep(cur);
+        System.out.println(steps.size());
+      }
+      if (w.isActive(cur))
+        isNew = true;
+    }
+    System.out.println(steps.size() + " steps in wizard");
   }
 
   public boolean projectHasBioEntities(String spaceCode, String code) {
@@ -162,23 +179,23 @@ public class WizardController {
 
   public void init() {
     this.w = new Wizard();
-    final ProjectContextStep s1 = new ProjectContextStep(spaces);
-    final EntityStep s2 = new EntityStep(taxMap);
-    final FactorStep s3 = new FactorStep(taxMap.keySet(), "Species", "Biological Conditions");
-    final NegativeSelectionStep s4 = new NegativeSelectionStep("Biological Entities");
-    final ExtractionStep s5 = new ExtractionStep(tissueMap);
-    final FactorStep s6 = new FactorStep(tissueMap.keySet(), "Tissue", "Extraction Conditions");
-    final NegativeSelectionStep s7 = new NegativeSelectionStep("Sample Extracts");
-    final TestStep s8 = new TestStep(measureTypes);
-    final CreateDataStep s9 = new CreateDataStep();
-    final UploadRegisterStep s10 = new UploadRegisterStep();
-    steps = new ArrayList<WizardStep>(Arrays.asList(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10));
+    final ProjectContextStep contextStep = new ProjectContextStep(spaces);
+    final EntityStep entStep = new EntityStep(taxMap);
+    final FactorStep entFactStep =
+        new FactorStep(taxMap.keySet(), "Species", "Biological Conditions");
+    final NegativeSelectionStep negStep1 = new NegativeSelectionStep("Biological Entities");
+    final ExtractionStep extrStep = new ExtractionStep(tissueMap);
+    final FactorStep extrFactStep =
+        new FactorStep(tissueMap.keySet(), "Tissue", "Extraction Conditions");
+    final NegativeSelectionStep negStep2 = new NegativeSelectionStep("Sample Extracts");
+    final TestStep techStep = new TestStep(measureTypes);
+    final UploadRegisterStep regStep = new UploadRegisterStep();
+    steps =
+        new ArrayList<WizardStep>(Arrays.asList(contextStep, entStep, entFactStep, negStep1,
+            extrStep, extrFactStep, negStep2, techStep, regStep));
 
     this.dataAggregator = new WizardDataAggregator(steps, openbis, taxMap, tissueMap);
-    w.addStep(s1);
-    // for (WizardStep s : steps) {
-    // w.addStep(s);
-    // }
+    w.addStep(contextStep);
 
     final Uploader tsvController = new Uploader();
     Upload upload = new Upload("Upload a tsv here", tsvController);
@@ -192,26 +209,27 @@ public class WizardController {
         String error = tsvController.getError();
         File file = tsvController.getFile();
         if (error == null || error.isEmpty()) {
-          s10.clearError();
+          regStep.clearError();
           try {
-            s10.setRegEnabled(false);
+            regStep.setRegEnabled(false);
             SamplePreparator prep = new SamplePreparator();
             prep.processTSV(file);
-            s10.setSummary(prep.getSummary());
-            s10.setProcessed(prep.getProcessed());
-            s10.setRegEnabled(true);
+            System.out.println("graph: " + prep.toGraphML());
+            regStep.setSummary(prep.getSummary());
+            regStep.setProcessed(prep.getProcessed());
+            regStep.setRegEnabled(true);
           } catch (FileNotFoundException e) {
             e.printStackTrace();
           }
         } else {
-          s10.setError(error);
+          regStep.setError(error);
           if (!file.delete())
             System.err.println("File was not deleted!");
         }
       }
     };
     upload.addFinishedListener(uploadFinListener);
-    s10.initUpload(upload);
+    regStep.initUpload(upload);
 
     /**
      * Button listeners
@@ -221,36 +239,29 @@ public class WizardController {
       @Override
       public void buttonClick(ClickEvent event) {
         String src = event.getButton().getCaption();
-        if (src.equals("Download existing project") && s1.getProjectCode() != null) {
+        if (src.equals("Download existing project") && contextStep.getProjectCode() != null) {
           List<NewSampleModelBean> beans = new ArrayList<NewSampleModelBean>();
-          for (Sample s : openbis.getSamplesOfProject(s1.getProjectCode())) {
+          for (Sample s : openbis.getSamplesOfProject(contextStep.getProjectCode())) {
             beans.add(new NewSampleModelBean(s.getCode(),
                 s.getProperties().get("Q_SECONDARY_NAME"), s.getSampleTypeCode()));
           }
         }
         if (src.equals("Download TSV")) {
-          FileResource resource = null;
-          try {
-            File tsv = dataAggregator.createTSV();
-            resource = new FileResource(tsv);
-          } catch (FileNotFoundException e) {
-            e.printStackTrace();
-          } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-          }
+          FileResource resource = new FileResource(dataAggregator.getTSV());
           Page.getCurrent().open(resource, "Download", true);
         }
 
         if (src.equals("Jump to TSV upload")) {
+          contextStep.getProjectContext().setValue(null);
           resetNextSteps();
-          skipToUpload();
-          s1.allowNext(true);
+          setUpLoadStep();
+          contextStep.allowNext(true);
           w.next();
         }
 
         if (src.equals("Register All")) {
           List<List<ISampleBean>> hierarchy = new ArrayList<List<ISampleBean>>();
-          for (List<List<ISampleBean>> midList : s10.getSamples()) {
+          for (List<List<ISampleBean>> midList : regStep.getSamples()) {
             List<ISampleBean> collect = new ArrayList<ISampleBean>();
             for (List<ISampleBean> inner : midList) {
               createExperiment(inner.get(0));
@@ -260,8 +271,9 @@ public class WizardController {
             }
             hierarchy.add(collect);
           }
-          openbisCreator.registerSampleBatchLevelWiseWithProgress(hierarchy, s10.getProgressBar(),
-              s10.getProgressLabel(), new RegisteredSamplesReadyRunnable(s10));
+          openbisCreator.registerSampleBatchLevelWiseWithProgress(hierarchy,
+              regStep.getProgressBar(), regStep.getProgressLabel(),
+              new RegisteredSamplesReadyRunnable(regStep));
         }
       }
 
@@ -289,9 +301,9 @@ public class WizardController {
         metadata.remove("XML_FACTORS");
       }
     };
-    s1.getButtons().addClickListener(cl);
-    s9.getDownloadButton().addClickListener(cl);
-    s10.getRegisterButton().addClickListener(cl);
+    contextStep.getButtons().addClickListener(cl);
+    regStep.getDownloadButton().addClickListener(cl);
+    regStep.getRegisterButton().addClickListener(cl);
 
     /**
      * Space selection listener
@@ -300,19 +312,19 @@ public class WizardController {
 
       @Override
       public void valueChange(ValueChangeEvent event) {
-        s1.resetProjects();
-        String space = s1.getSpaceCode();
+        contextStep.resetProjects();
+        String space = contextStep.getSpaceCode();
         if (space != null) {
           List<String> projects = new ArrayList<String>();
           for (Project p : openbis.getProjectsOfSpace(space)) {
             projects.add(p.getCode());
           }
-          s1.setProjectCodes(projects);
+          contextStep.setProjectCodes(projects);
         }
       }
 
     };
-    s1.getSpaceBox().addValueChangeListener(spaceSelectListener);
+    contextStep.getSpaceBox().addValueChangeListener(spaceSelectListener);
 
     /**
      * Project selection listener
@@ -322,25 +334,27 @@ public class WizardController {
 
       @Override
       public void valueChange(ValueChangeEvent event) {
-        s1.resetExperiments();
-        String space = s1.getSpaceCode();
-        String project = s1.getProjectCode();
+        contextStep.resetExperiments();
+        String space = contextStep.getSpaceCode();
+        String project = contextStep.getProjectCode();
         if (project != null) {
-          s1.enableNewContextOption(true);
-          s1.enableExtractContextOption(projectHasBioEntities(space, project));
-          s1.enableMeasureContextOption(projectHasExtracts(space, project));
+          contextStep.enableNewContextOption(true);
+          contextStep.enableExtractContextOption(projectHasBioEntities(space, project));
+          contextStep.enableMeasureContextOption(projectHasExtracts(space, project));
+          contextStep.enableCopyContextOption(projectHasBioEntities(space, project)
+              || projectHasExtracts(space, project));
           List<ExperimentBean> beans = new ArrayList<ExperimentBean>();
           for (Experiment e : openbis.getExperimentsOfProjectByCode(project)) {
             int numOfSamples = openbis.getSamplesofExperiment(e.getCode()).size();
             beans.add(new ExperimentBean(e.getCode(), e.getExperimentTypeCode(), Integer
                 .toString(numOfSamples)));
           }
-          s1.setExperiments(beans);
+          contextStep.setExperiments(beans);
         }
       }
 
     };
-    s1.getProjectBox().addValueChangeListener(projectSelectListener);
+    contextStep.getProjectBox().addValueChangeListener(projectSelectListener);
 
     /**
      * Experiment selection listener
@@ -350,8 +364,8 @@ public class WizardController {
 
       @Override
       public void valueChange(ValueChangeEvent event) {
-        s1.resetSamples();
-        ExperimentBean exp = s1.getExperimentName();
+        contextStep.resetSamples();
+        ExperimentBean exp = contextStep.getExperimentName();
         if (exp != null) {
           String code = exp.getCode();
           List<NewSampleModelBean> beans = new ArrayList<NewSampleModelBean>();
@@ -359,12 +373,12 @@ public class WizardController {
             beans.add(new NewSampleModelBean(s.getCode(),
                 s.getProperties().get("Q_SECONDARY_NAME"), s.getSampleTypeCode()));
           }
-          s1.setSamples(beans);
+          contextStep.setSamples(beans);
         }
       }
 
     };
-    s1.getExperimentTable().addValueChangeListener(expSelectListener);
+    contextStep.getExperimentTable().addValueChangeListener(expSelectListener);
 
     /**
      * Project context (radio buttons) listener
@@ -374,13 +388,15 @@ public class WizardController {
 
       @Override
       public void valueChange(ValueChangeEvent event) {
-        if (s1.getProjectContext().getValue() != null) {
+        if (contextStep.getProjectContext().getValue() != null) {
+          System.out.println("context change");
           resetNextSteps();
-          OptionGroup projectContext = s1.getProjectContext();
-          List<String> contextOptions = s1.getContextOptions();
-          List<ExperimentBean> experiments = s1.getExperiments();
+          OptionGroup projectContext = contextStep.getProjectContext();
+          List<String> contextOptions = contextStep.getContextOptions();
+          List<ExperimentBean> experiments = contextStep.getExperiments();
           String context = (String) projectContext.getValue();
           List<ExperimentBean> beans = new ArrayList<ExperimentBean>();
+          // inherit from bio entities
           if (contextOptions.get(1).equals(context)) {
             for (ExperimentBean b : experiments) {
               if (b.getExperiment_type().equals(ExperimentType.Q_EXPERIMENTAL_DESIGN.toString()))
@@ -390,6 +406,7 @@ public class WizardController {
             dataAggregator.setInheritEntities(true);
             dataAggregator.setInheritExtracts(false);
           }
+          // inherit from sample extraction
           if (contextOptions.get(2).equals(context)) {
             for (ExperimentBean b : experiments) {
               if (b.getExperiment_type().equals(ExperimentType.Q_SAMPLE_EXTRACTION.toString()))
@@ -399,37 +416,45 @@ public class WizardController {
             dataAggregator.setInheritEntities(false);
             dataAggregator.setInheritExtracts(true);
           }
+          // new experiments
           if (contextOptions.get(0).equals(context)) {
             setCreateEntities();
             dataAggregator.setInheritEntities(false);
             dataAggregator.setInheritExtracts(false);
           }
-          s1.showExperiments(beans);
+          // copy experiments
+          if (contextOptions.get(3).equals(context)) {
+            beans.addAll(experiments);
+            setUpLoadStep();
+          }
+          contextStep.showExperiments(beans);
         }
       }
     };
-    s1.getProjectContext().addValueChangeListener(projectContextListener);
+    contextStep.getProjectContext().addValueChangeListener(projectContextListener);
 
     ValueChangeListener entityConditionSetListener = new ValueChangeListener() {
 
       @Override
       public void valueChange(ValueChangeEvent event) {
-        if (s2.conditionsSet().getValue() != null) {
+        if (entStep.conditionsSet().getValue() != null) {
+          System.out.println("conditions");
           resetNextSteps();
           setEntityConditions();
         } else {
+          System.out.println("inherit");
           setInheritEntities();
           resetNextSteps();
         }
       }
     };
-    s2.conditionsSet().addValueChangeListener(entityConditionSetListener);
+    entStep.conditionsSet().addValueChangeListener(entityConditionSetListener);
 
     ValueChangeListener extractConditionSetListener = new ValueChangeListener() {
 
       @Override
       public void valueChange(ValueChangeEvent event) {
-        if (s5.conditionsSet().getValue() != null) {
+        if (extrStep.conditionsSet().getValue() != null) {
           resetNextSteps();
           setExtractConditions();
         } else {
@@ -438,7 +463,7 @@ public class WizardController {
         }
       }
     };
-    s5.conditionsSet().addValueChangeListener(extractConditionSetListener);
+    extrStep.conditionsSet().addValueChangeListener(extractConditionSetListener);
 
     WizardProgressListener wl = new WizardProgressListener() {
       @Override
@@ -454,118 +479,107 @@ public class WizardController {
 
       @Override
       public void activeStepChanged(WizardStepActivationEvent event) {
-        if (event.getActivatedStep().equals(s1)) {
-          lastStep = 1;
+        if (event.getActivatedStep().equals(contextStep)) {
           System.out.println("project context step");
-          s1.allowNext(false);
+          contextStep.allowNext(false);
         }
         // Entity Setup Step
-        if (event.getActivatedStep().equals(s2)) {
-          // int last = lastStep;
-          lastStep = 2;
+        if (event.getActivatedStep().equals(entStep)) {
           System.out.println("entity setup step");
-          s3.resetFactorFields();
+          entFactStep.resetFactorFields();
           bioFactorInstancesSet = false;
           // }
         }
         // Entity Factor Instances Step
-        if (event.getActivatedStep().equals(s3)) {
+        if (event.getActivatedStep().equals(entFactStep)) {
           System.out.println("entity factor instance step");
-          int last = lastStep;
-          lastStep = 3;
           if (!bioFactorInstancesSet) {
-            if (s2.speciesIsFactor())
-              s3.initOptionsFactorField(s2.getSpeciesAmount());
-            s3.initFactorFields(s2.getFactors());
+            if (entStep.speciesIsFactor())
+              entFactStep.initOptionsFactorField(entStep.getSpeciesAmount());
+            entFactStep.initFactorFields(entStep.getFactors());
             bioFactorInstancesSet = true;
           }
         }
         // }
         // Negative Selection of Entities
-        if (event.getActivatedStep().equals(s4)) {
+        if (event.getActivatedStep().equals(negStep1)) {
           System.out.println("entity negative selection step");
-          int last = lastStep;
-          lastStep = 4;
           try {
-            s4.setSamples(dataAggregator.prepareEntities());
+            negStep1.setSamples(dataAggregator.prepareEntities());
           } catch (JAXBException e) {
             e.printStackTrace();
           }
         }
         // }
         // Extract Setup Step
-        if (event.getActivatedStep().equals(s5)) {
-          System.out.println("extract setup step");
-          int last = lastStep;
-          lastStep = 5;
-          dataAggregator.setEntities(s4.getSamples());
-          s6.resetFactorFields();
+        if (event.getActivatedStep().equals(extrStep)) {
+          dataAggregator.setEntities(negStep1.getSamples());
+          extrFactStep.resetFactorFields();
           extractFactorInstancesSet = false;
         }
         // }
         // Extract Factor Instances Step
-        if (event.getActivatedStep().equals(s6)) {
-          System.out.println("extract factor instance step");
-          int last = lastStep;
-          lastStep = 6;
+        if (event.getActivatedStep().equals(extrFactStep)) {
           if (!extractFactorInstancesSet) {
-            if (s5.tissueIsFactor())
-              s6.initOptionsFactorField(s5.getTissueAmount());
-            s6.initFactorFields(s5.getFactors());
+            if (extrStep.tissueIsFactor())
+              extrFactStep.initOptionsFactorField(extrStep.getTissueAmount());
+            extrFactStep.initFactorFields(extrStep.getFactors());
             extractFactorInstancesSet = true;
           }
         }
         // }
         // Negative Selection of Extracts
-        if (event.getActivatedStep().equals(s7)) {
-          System.out.println("extract negative selection step");
-          int last = lastStep;
-          lastStep = 7;
-          if (s7.isSkipped()) {
-            if (last > 7)
-              w.back();
-            else
-              w.next();
-          } else {
-            try {
-              s7.setSamples(dataAggregator.prepareExtracts());
-            } catch (JAXBException e) {
-              e.printStackTrace();
-            }
+        if (event.getActivatedStep().equals(negStep2)) {
+          try {
+            negStep2.setSamples(dataAggregator.prepareExtracts());
+          } catch (JAXBException e) {
+            e.printStackTrace();
           }
         }
         // Test Setup Step
-        if (event.getActivatedStep().equals(s8)) {
-          System.out.println("test samples step");
-          int last = lastStep;
-          lastStep = 8;
-          dataAggregator.setExtracts(s7.getSamples());
-          if (s8.isSkipped()) {
-            if (last > 8)
-              w.back();
-            else
-              w.next();
-          } else {
-          }
+        if (event.getActivatedStep().equals(techStep)) {
+          dataAggregator.setExtracts(negStep2.getSamples());
         }
-        // TSV Download Step
-        if (event.getActivatedStep().equals(s9)) {
-          System.out.println("tsv step");
-          int last = lastStep;
-          lastStep = 9;
-          if (s9.isSkipped()) {
-            if (last > 9)
-              w.back();
-            else
-              w.next();
-          } else {
+        // TSV and Registration Step
+        if (event.getActivatedStep().equals(regStep)) {
+          if (contextStep.copyModeSet()) {
+            try {
+              dataAggregator.copyExperiment();
+            } catch (JAXBException e1) {
+              e1.printStackTrace();
+            }
+            try {
+              dataAggregator.createTSV();
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+              e.printStackTrace();
+            }
+            SamplePreparator prep = new SamplePreparator();
+            try {
+              prep.processTSV(dataAggregator.getTSV());
+            } catch (FileNotFoundException e) {
+              e.printStackTrace();
+            }
+            regStep.setSummary(prep.getSummary());
+            regStep.setProcessed(prep.getProcessed());
+          }
+          //Test samples were filled out
+          if (w.getSteps().contains(steps.get(7))) {
             dataAggregator.prepareTestSamples();
+            try {
+              dataAggregator.createTSV();
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+              e.printStackTrace();
+            }
+            SamplePreparator prep = new SamplePreparator();
+            try {
+              prep.processTSV(dataAggregator.getTSV());
+            } catch (FileNotFoundException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
+            regStep.setSummary(prep.getSummary());
+            regStep.setProcessed(prep.getProcessed());
           }
-        }
-        if (event.getActivatedStep().equals(s10)) {
-          System.out.println("register step");
-          int last = lastStep;
-          lastStep = 10;
         }
       }
     };
@@ -577,14 +591,12 @@ public class WizardController {
     String proj = s.getProject();
     String expCode = s.getExperiment();
     String expType = "";
-    System.out.println(space + proj + expCode);
     if (s.getType().equals("Q_BIOLOGICAL_ENTITY"))
       expType = ExperimentType.Q_EXPERIMENTAL_DESIGN.toString();
     else if (s.getType().equals("Q_BIOLOGICAL_SAMPLE"))
       expType = ExperimentType.Q_SAMPLE_EXTRACTION.toString();
     else if (s.getType().equals("Q_TEST_SAMPLE"))
       expType = ExperimentType.Q_SAMPLE_PREPARATION.toString();
-    System.out.println(expType);
     if (!openbis.expExists(space, proj, expCode))
       openbisCreator.registerExperiment(space, proj, expType, expCode);
   }

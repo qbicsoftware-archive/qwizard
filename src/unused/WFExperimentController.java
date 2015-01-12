@@ -16,6 +16,7 @@ import model.NewSampleModelBean;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Project;
 import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Sample;
+import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.SearchCriteria;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -180,12 +181,15 @@ public class WFExperimentController {
 
   protected ArrayList<IBarcodeBean> translateBeans(Collection<NewSampleModelBean> samples) {
     List<Sample> samplePool = openbis.getSamplesOfProject(view.getProjectCode());
-    Map<String, ArrayList<String>> parentMap = openbis.getParentMap(samplePool);
+    Map<Sample, List<Sample>> parentMap = openbis.getParentMap(samplePool);
     ArrayList<IBarcodeBean> res = new ArrayList<IBarcodeBean>();
-    for (NewSampleModelBean s : samples) {
-      res.add(new NewModelBarcodeBean(s.getCode(), s.getSecondary_Name(), s.getType(), parentMap
-          .get(s.getCode())));
-    }
+//TODO
+    //    for (NewSampleModelBean s : samples) {
+//      List<String> parents = new ArrayList<String>();
+//      openbis.getFacade().searchForSamples(new SearchCriteria()))
+//      for(parentMap.get(s)
+//      res.add(new NewModelBarcodeBean(s.getCode(), s.getSecondary_Name(), s.getType(), )));
+//    }
     return res;
   }
 

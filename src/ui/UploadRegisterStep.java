@@ -22,6 +22,7 @@ import com.vaadin.ui.VerticalLayout;
 public class UploadRegisterStep implements WizardStep {
 
   private VerticalLayout main;
+  private Button download;
   private Button register;
   private TextArea error;
   private Upload upload;
@@ -33,6 +34,8 @@ public class UploadRegisterStep implements WizardStep {
   public UploadRegisterStep() {
     main = new VerticalLayout();
     main.setMargin(true);
+    download = new Button("Download TSV");
+    main.addComponent(download);
     error = new TextArea();
     error.setVisible(false);
     summary = new Table("Summary");
@@ -48,6 +51,10 @@ public class UploadRegisterStep implements WizardStep {
     main.addComponent(bar);
   }
 
+  public Button getDownloadButton() {
+    return this.download;
+  }
+  
   public void initUpload(Upload upload) {
     this.upload = upload;
     main.addComponent(this.upload);

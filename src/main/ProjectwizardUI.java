@@ -108,6 +108,7 @@ public class ProjectwizardUI extends UI {
 //      config.load(new FileReader("/home/kenar/JavaDev/portlets.properties"));
       StringWriter configDebug = new StringWriter();
       config.list(new PrintWriter(configDebug));
+      //test
       tmpFolder = config.getProperty(TMP_FOLDER);
       dataSourceUser = config.getProperty(DATASOURCE_USER);
       dataSourcePass = config.getProperty(DATASOURCE_PASS);

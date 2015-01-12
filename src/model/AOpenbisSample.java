@@ -16,6 +16,34 @@ public abstract class AOpenbisSample {
   String Q_ADDITIONAL_NOTES;
   String parent;
 
+  public void setSampleType(String sampleType) {
+    this.sampleType = sampleType;
+  }
+
+  public void setCode(String code) {
+    this.code = code;
+  }
+
+  public void setExperiment(String experiment) {
+    this.experiment = experiment;
+  }
+
+  public void setQ_SECONDARY_NAME(String q_SECONDARY_NAME) {
+    Q_SECONDARY_NAME = q_SECONDARY_NAME;
+  }
+
+  public void setFactors(List<Factor> factors) {
+    this.factors = factors;
+  }
+
+  public void setQ_ADDITIONAL_NOTES(String q_ADDITIONAL_NOTES) {
+    Q_ADDITIONAL_NOTES = q_ADDITIONAL_NOTES;
+  }
+
+  public void setParent(String parent) {
+    this.parent = parent;
+  }
+
   AOpenbisSample(String code, String experiment, String secondaryName, String additionalNotes,
       List<Factor> factors, String parent) {
     this.code = code;

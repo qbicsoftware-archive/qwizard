@@ -16,7 +16,7 @@ public class CreateDataStep implements WizardStep {
   public CreateDataStep() {
     main = new VerticalLayout();
     download = new Button("Download TSV");
-    main.addComponent(download);;
+    main.addComponent(download);
   }
   
   public Button getDownloadButton() {

@@ -36,6 +36,7 @@ public class NegativeSelectionStep implements WizardStep {
     main.removeAllComponents();
     System.out.println(samples);
     tab = new SummaryTable("Samples", samples);
+    tab.table.setPageLength(samples.size());
     main.addComponent(tab);
   }
 
