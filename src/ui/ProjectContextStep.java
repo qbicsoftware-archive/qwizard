@@ -194,7 +194,7 @@ public class ProjectContextStep implements WizardStep {
     if (jumpAllowed)
       return true;
     if (spaceReady() && projectReady()) {
-      if (inherit())
+      if (inherit() || copy())
         if (expSelected())
           return true;
         else
@@ -212,6 +212,11 @@ public class ProjectContextStep implements WizardStep {
   private boolean inherit() {
     String context = (String) projectContext.getValue();
     return (contextOptions.get(1).equals(context) || contextOptions.get(2).equals(context));
+  }
+
+  private boolean copy() {
+    String context = (String) projectContext.getValue();
+    return contextOptions.get(3).equals(context);
   }
 
   private boolean projectReady() {

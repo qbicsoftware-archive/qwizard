@@ -134,20 +134,15 @@ public class WizardController {
     List<WizardStep> steps = w.getSteps();
     List<WizardStep> copy = new ArrayList<WizardStep>();
     copy.addAll(steps);
-    System.out.println(steps.size() + " steps in wizard");
     boolean isNew = false;
     for (int i = 0; i < copy.size(); i++) {
       WizardStep cur = copy.get(i);
-      System.out.println(cur + " active " + w.isActive(cur));
       if (isNew) {
-        System.out.println(cur + " removed");
         w.removeStep(cur);
-        System.out.println(steps.size());
       }
       if (w.isActive(cur))
         isNew = true;
     }
-    System.out.println(steps.size() + " steps in wizard");
   }
 
   public boolean projectHasBioEntities(String spaceCode, String code) {
@@ -164,8 +159,6 @@ public class WizardController {
     if (!openbis.projectExists(spaceCode, code))
       return false;
     for (Experiment e : openbis.getExperimentsOfProjectByCode(code)) {
-      System.out.println(e.getCode());
-      System.out.println(e.getExperimentTypeCode());
       if (e.getExperimentTypeCode().equals("Q_SAMPLE_EXTRACTION"))
         if (openbis.getSamplesofExperiment(e.getIdentifier()).size() > 0)
           return true;
@@ -214,7 +207,6 @@ public class WizardController {
             regStep.setRegEnabled(false);
             SamplePreparator prep = new SamplePreparator();
             prep.processTSV(file);
-            System.out.println("graph: " + prep.toGraphML());
             regStep.setSummary(prep.getSummary());
             regStep.setProcessed(prep.getProcessed());
             regStep.setRegEnabled(true);
@@ -266,8 +258,9 @@ public class WizardController {
             for (List<ISampleBean> inner : midList) {
               createExperiment(inner.get(0));
               collect.addAll(inner);
-              for (ISampleBean b : inner)
+              for (ISampleBean b : inner) {
                 fixXMLProps((Map<String, String>) b.getMetadata());
+              }
             }
             hierarchy.add(collect);
           }
@@ -285,7 +278,6 @@ public class WizardController {
           for (String f : fStrings) {
             String[] fields = f.split(":");
             String lab = fields[0].replace(" ", "");
-            System.out.println(lab);
             String val = fields[1].replace(" ", "");
             if (fields.length > 2)
               factors.add(new Factor(lab, val, fields[2].replace(" ", "")));
@@ -389,7 +381,6 @@ public class WizardController {
       @Override
       public void valueChange(ValueChangeEvent event) {
         if (contextStep.getProjectContext().getValue() != null) {
-          System.out.println("context change");
           resetNextSteps();
           OptionGroup projectContext = contextStep.getProjectContext();
           List<String> contextOptions = contextStep.getContextOptions();
@@ -438,11 +429,9 @@ public class WizardController {
       @Override
       public void valueChange(ValueChangeEvent event) {
         if (entStep.conditionsSet().getValue() != null) {
-          System.out.println("conditions");
           resetNextSteps();
           setEntityConditions();
         } else {
-          System.out.println("inherit");
           setInheritEntities();
           resetNextSteps();
         }
@@ -562,7 +551,7 @@ public class WizardController {
             regStep.setSummary(prep.getSummary());
             regStep.setProcessed(prep.getProcessed());
           }
-          //Test samples were filled out
+          // Test samples were filled out
           if (w.getSteps().contains(steps.get(7))) {
             dataAggregator.prepareTestSamples();
             try {
@@ -580,6 +569,7 @@ public class WizardController {
             regStep.setSummary(prep.getSummary());
             regStep.setProcessed(prep.getProcessed());
           }
+          regStep.setRegEnabled(true);
         }
       }
     };

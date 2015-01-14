@@ -531,9 +531,9 @@ public class WizardDataAggregator {
     ExperimentType eType = ExperimentType.Q_EXPERIMENTAL_DESIGN;
     if (type.equals("Q_BIOLOGICAL_ENTITY"))
       eType = ExperimentType.Q_EXPERIMENTAL_DESIGN;
-    else if (type.equals("Q_BIOLOGICAL_ENTITY"))
+    else if (type.equals("Q_BIOLOGICAL_SAMPLE"))
       eType = ExperimentType.Q_SAMPLE_EXTRACTION;
-    else if (type.equals("Q_BIOLOGICAL_ENTITY"))
+    else if (type.equals("Q_TEST_SAMPLE"))
       eType = ExperimentType.Q_SAMPLE_PREPARATION;
     else
       System.err.println("Unexpected type: " + type);
