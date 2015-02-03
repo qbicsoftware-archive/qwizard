@@ -46,7 +46,7 @@ import com.vaadin.ui.Upload.FinishedListener;
 
 import ui.EntityStep;
 import ui.ExtractionStep;
-import ui.FactorStep;
+import ui.ConditionInstanceStep;
 import ui.NegativeSelectionStep;
 import ui.ProjectContextStep;
 import ui.TestStep;
@@ -92,10 +92,12 @@ public class WizardController {
     this.spaces = spaces;
   }
 
+  // Functions to add steps to the wizard depending on context
+  // - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
   private void setUpLoadStep() {
     System.out.println("add tsv step");
     w.addStep(steps.get(8)); // tsv upload and registration
-    System.out.println(w.getSteps().size() + " steps");
   }
 
   private void setInheritEntities() {
@@ -145,6 +147,14 @@ public class WizardController {
     }
   }
 
+  /**
+   * Test is a project has biological entities registered. Used to know availability of context
+   * options
+   * 
+   * @param spaceCode Code of the selected openBIS space
+   * @param code Code of the project
+   * @return
+   */
   public boolean projectHasBioEntities(String spaceCode, String code) {
     if (!openbis.projectExists(spaceCode, code))
       return false;
@@ -155,6 +165,14 @@ public class WizardController {
     return false;
   }
 
+  /**
+   * Test is a project has biological extracts registered. Used to know availability of context
+   * options
+   * 
+   * @param spaceCode Code of the selected openBIS space
+   * @param code Code of the project
+   * @return
+   */
   public boolean projectHasExtracts(String spaceCode, String code) {
     if (!openbis.projectExists(spaceCode, code))
       return false;
@@ -170,16 +188,19 @@ public class WizardController {
     return w;
   }
 
+  /**
+   * Initialize all possible steps in the wizard and the listeners used
+   */
   public void init() {
     this.w = new Wizard();
     final ProjectContextStep contextStep = new ProjectContextStep(spaces);
     final EntityStep entStep = new EntityStep(taxMap);
-    final FactorStep entFactStep =
-        new FactorStep(taxMap.keySet(), "Species", "Biological Conditions");
+    final ConditionInstanceStep entFactStep =
+        new ConditionInstanceStep(taxMap.keySet(), "Species", "Biological Conditions");
     final NegativeSelectionStep negStep1 = new NegativeSelectionStep("Biological Entities");
     final ExtractionStep extrStep = new ExtractionStep(tissueMap);
-    final FactorStep extrFactStep =
-        new FactorStep(tissueMap.keySet(), "Tissue", "Extraction Conditions");
+    final ConditionInstanceStep extrFactStep =
+        new ConditionInstanceStep(tissueMap.keySet(), "Tissue", "Extraction Conditions");
     final NegativeSelectionStep negStep2 = new NegativeSelectionStep("Sample Extracts");
     final TestStep techStep = new TestStep(measureTypes);
     final UploadRegisterStep regStep = new UploadRegisterStep();
@@ -198,6 +219,11 @@ public class WizardController {
     upload.addFailedListener(tsvController);
     upload.addSucceededListener(tsvController);
     FinishedListener uploadFinListener = new FinishedListener() {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -8413963075202260180L;
+
       public void uploadFinished(FinishedEvent event) {
         String error = tsvController.getError();
         File file = tsvController.getFile();
@@ -227,7 +253,12 @@ public class WizardController {
      * Button listeners
      */
     Button.ClickListener cl = new Button.ClickListener() {
-      @SuppressWarnings("unchecked")
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -8427457552926464653L;
+
+      @SuppressWarnings("deprecation")
       @Override
       public void buttonClick(ClickEvent event) {
         String src = event.getButton().getCaption();
@@ -270,13 +301,20 @@ public class WizardController {
         }
       }
 
+      /**
+       * Creates Factor instances from the XML Factor column of the TSV and creates and XML from
+       * them that can be registered to the openBIS model
+       * 
+       * @param metadata The metadata map of a sample
+       */
       private void fixXMLProps(Map<String, String> metadata) {
         Parser p = new Parser();
         List<Factor> factors = new ArrayList<Factor>();
         if (metadata.get("XML_FACTORS") != null) {
           String[] fStrings = metadata.get("XML_FACTORS").split(";");
-          for (String f : fStrings) {
-            String[] fields = f.split(":");
+          for (String factor : fStrings) {
+            factor = factor.trim();
+            String[] fields = factor.split(":");
             String lab = fields[0].replace(" ", "");
             String val = fields[1].replace(" ", "");
             if (fields.length > 2)
@@ -302,6 +340,11 @@ public class WizardController {
      */
     ValueChangeListener spaceSelectListener = new ValueChangeListener() {
 
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -7487587994432604593L;
+
       @Override
       public void valueChange(ValueChangeEvent event) {
         contextStep.resetProjects();
@@ -323,6 +366,11 @@ public class WizardController {
      */
 
     ValueChangeListener projectSelectListener = new ValueChangeListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -443162343850159312L;
 
       @Override
       public void valueChange(ValueChangeEvent event) {
@@ -354,6 +402,11 @@ public class WizardController {
 
     ValueChangeListener expSelectListener = new ValueChangeListener() {
 
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 1931780520075315462L;
+
       @Override
       public void valueChange(ValueChangeEvent event) {
         contextStep.resetSamples();
@@ -377,6 +430,11 @@ public class WizardController {
      */
 
     ValueChangeListener projectContextListener = new ValueChangeListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 5972535836592118817L;
 
       @Override
       public void valueChange(ValueChangeEvent event) {
@@ -424,7 +482,15 @@ public class WizardController {
     };
     contextStep.getProjectContext().addValueChangeListener(projectContextListener);
 
+    /**
+     * Listeners for entity and extract conditions
+     */
     ValueChangeListener entityConditionSetListener = new ValueChangeListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 2393762547426343668L;
 
       @Override
       public void valueChange(ValueChangeEvent event) {
@@ -440,6 +506,11 @@ public class WizardController {
     entStep.conditionsSet().addValueChangeListener(entityConditionSetListener);
 
     ValueChangeListener extractConditionSetListener = new ValueChangeListener() {
+
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 4879458823482873630L;
 
       @Override
       public void valueChange(ValueChangeEvent event) {
@@ -466,6 +537,9 @@ public class WizardController {
 
       }
 
+      /**
+       * Reactions to step changes in the wizard
+       */
       @Override
       public void activeStepChanged(WizardStepActivationEvent event) {
         if (event.getActivatedStep().equals(contextStep)) {
@@ -489,7 +563,6 @@ public class WizardController {
             bioFactorInstancesSet = true;
           }
         }
-        // }
         // Negative Selection of Entities
         if (event.getActivatedStep().equals(negStep1)) {
           System.out.println("entity negative selection step");
@@ -499,14 +572,12 @@ public class WizardController {
             e.printStackTrace();
           }
         }
-        // }
         // Extract Setup Step
         if (event.getActivatedStep().equals(extrStep)) {
           dataAggregator.setEntities(negStep1.getSamples());
           extrFactStep.resetFactorFields();
           extractFactorInstancesSet = false;
         }
-        // }
         // Extract Factor Instances Step
         if (event.getActivatedStep().equals(extrFactStep)) {
           if (!extractFactorInstancesSet) {
@@ -516,7 +587,6 @@ public class WizardController {
             extractFactorInstancesSet = true;
           }
         }
-        // }
         // Negative Selection of Extracts
         if (event.getActivatedStep().equals(negStep2)) {
           try {
@@ -569,13 +639,19 @@ public class WizardController {
             regStep.setSummary(prep.getSummary());
             regStep.setProcessed(prep.getProcessed());
           }
-          regStep.setRegEnabled(true);
+          if (regStep.summaryIsSet())
+            regStep.setRegEnabled(true);
         }
       }
     };
     w.addListener(wl);
   }
 
+  /**
+   * Create experiments in openBIS if they don't already exist
+   * 
+   * @param s One of the samples of the experiment that should be created.
+   */
   protected void createExperiment(ISampleBean s) {
     String space = s.getSpace();
     String proj = s.getProject();

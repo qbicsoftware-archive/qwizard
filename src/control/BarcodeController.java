@@ -161,9 +161,9 @@ public class BarcodeController {
         view.resetSamples();
         Collection<ExperimentBarcodeSummaryBean> exps = view.getExperiments();
         if (exps.size() > 0) {
-          view.enableCreation(true);
+          view.newExperimentSelected(true);
         } else {
-          view.enableCreation(false);
+          view.newExperimentSelected(false);
         }
       }
 

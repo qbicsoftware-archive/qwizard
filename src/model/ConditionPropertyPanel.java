@@ -15,19 +15,28 @@ import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.VerticalLayout;
 
-@SuppressWarnings("serial")
+/**
+ * Composite UI component to input values of Property instances and their units
+ * @author Andreas Friedrich
+ *
+ */
 public class ConditionPropertyPanel extends VerticalLayout {
 
+  private static final long serialVersionUID = 3320102983685470217L;
   Label label;
   OptionGroup type;
   TextArea values;
   ComboBox unit;
 
+  /**
+   * Create a new Condition Property Panel
+   * @param condition The name of the condition selected
+   * @param units An EnumSet of units (e.g. SI units)
+   */
   public ConditionPropertyPanel(String condition, EnumSet<properties.Unit> units) {
     label = new Label(condition);
     type = new OptionGroup("", new ArrayList<String>(Arrays.asList("Continuous", "Categorical")));
     values = new TextArea("Values");
-//    Collections.sort(units);
     unit = new ComboBox("Unit", units);
     unit.setEnabled(false);
     unit.setNullSelectionAllowed(false);
@@ -56,6 +65,10 @@ public class ConditionPropertyPanel extends VerticalLayout {
     type.addValueChangeListener(typeListener);
   }
   
+  /**
+   * Returns all conditions with their units as a list
+   * @return
+   */
   public List<Factor> getFactors() {
     List<Factor> res = new ArrayList<Factor>();
     String unitVal = "";

@@ -7,25 +7,35 @@ import java.util.Map;
 
 import model.AOpenbisSample;
 
+import com.google.gwt.user.client.AsyncProxy.DefaultValue;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * Table to summarize prepared samples, remove them or adapt their secondary names
+ * @author Andreas Friedrich
+ *
+ */
 public class SummaryTable extends VerticalLayout {
 
-  Table table;
-  Map<String, AOpenbisSample> map;
+  private Table table;
+  private Map<String, AOpenbisSample> map;
 
+  /**
+   * Create a new summary table
+   * @param name Title of the table
+   * @param samples List of prepared AOpenbisSamples
+   */
   public SummaryTable(String name, List<AOpenbisSample> samples) {
     map = new HashMap<String, AOpenbisSample>();
     table = new Table(name);
     table.addContainerProperty("ID", String.class, null);
-    table.addContainerProperty("Conditions", String.class, null);
+    table.addContainerProperty("Secondary Name", String.class, null);
     table.addContainerProperty("Remove", Button.class, null);
     for (int i = 0; i < samples.size(); i++) {
       AOpenbisSample s = samples.get(i);
-      String code = s.getCode();
       String id = Integer.toString(i + 1);
       map.put(id, s);
 
@@ -47,18 +57,27 @@ public class SummaryTable extends VerticalLayout {
       });
 
       // Create the table row.
-      table.addItem(new Object[] {id, s.getValueMap().get("XML_FACTORS"), delete}, itemId);
+      table.addItem(new Object[] {id, s.getQ_SECONDARY_NAME(), delete}, itemId);
+      table.getItem(itemId).getItemProperty("ID").setReadOnly(true);
     }
     addComponent(table);
+    table.setEditable(true);
+    table.setImmediate(true);
   }
 
   public List<AOpenbisSample> getSamples() {
     List<AOpenbisSample> res = new ArrayList<AOpenbisSample>();
     for (Object id : table.getItemIds()) {
       String key = (String) table.getItem(id).getItemProperty("ID").getValue();
-      res.add(map.get((key)));
+      AOpenbisSample s = map.get(key);
+      s.setQ_SECONDARY_NAME((String) table.getItem(id).getItemProperty("Secondary Name").getValue());
+      res.add(s);
     }
     return res;
+  }
+
+  public void setPageLength(int size) {
+    table.setPageLength(size);
   }
 
 }

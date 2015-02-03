@@ -19,6 +19,11 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * Wizard Step to download and upload the TSV file to and from and register samples and experiments
+ * @author Andreas Friedrich
+ *
+ */
 public class UploadRegisterStep implements WizardStep {
 
   private VerticalLayout main;
@@ -34,6 +39,7 @@ public class UploadRegisterStep implements WizardStep {
   public UploadRegisterStep() {
     main = new VerticalLayout();
     main.setMargin(true);
+    main.setSpacing(true);
     download = new Button("Download TSV");
     main.addComponent(download);
     error = new TextArea();
@@ -54,7 +60,7 @@ public class UploadRegisterStep implements WizardStep {
   public Button getDownloadButton() {
     return this.download;
   }
-  
+
   public void initUpload(Upload upload) {
     this.upload = upload;
     main.addComponent(this.upload);
@@ -126,6 +132,10 @@ public class UploadRegisterStep implements WizardStep {
 
   public Label getProgressLabel() {
     return info;
+  }
+
+  public boolean summaryIsSet() {
+    return (summary.size() > 0);
   }
 
 }

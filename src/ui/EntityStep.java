@@ -20,8 +20,14 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * Wizard Step to model the biological entities of an experiment
+ * 
+ * @author Andreas Friedrich
+ * 
+ */
 public class EntityStep implements WizardStep {
-  
+
   boolean skip = false;
   OptionGroup conditionsSet = new OptionGroup("dummy");
 
@@ -32,23 +38,28 @@ public class EntityStep implements WizardStep {
 
   GridLayout grid;
   ConditionsPanel c;
-  
+
   String emptyFactor = "Other (please specify)";
   List<String> suggestions = new ArrayList<String>(Arrays.asList("Age", "Genotype", "Health State",
       "Phenotype", "Species", "Treatment", emptyFactor));
-  
+
   OpenbisInfoTextField speciesNum;
 
   OpenbisInfoTextField bioReps;
-  
+
   public ConditionsPanel getCondPanel() {
     return c;
   }
-  
+
   public OptionGroup conditionsSet() {
     return conditionsSet;
   }
-  
+
+  /**
+   * Create a new Entity step for the wizard
+   * 
+   * @param speciesMap A map of available species (codes and labels)
+   */
   public EntityStep(Map<String, String> speciesMap) {
     main = new VerticalLayout();
     main.setMargin(true);
@@ -62,7 +73,9 @@ public class EntityStep implements WizardStep {
     species =
         new OpenbisInfoComboBox("Species",
             "If there are samples of different species, leave this empty", openbisSpecies);
-    c = new ConditionsPanel(suggestions, emptyFactor, "Species", (ComboBox) species.getInnerComponent(), true, conditionsSet);
+    c =
+        new ConditionsPanel(suggestions, emptyFactor, "Species",
+            (ComboBox) species.getInnerComponent(), true, conditionsSet);
     main.addComponent(c);
 
     speciesNum =

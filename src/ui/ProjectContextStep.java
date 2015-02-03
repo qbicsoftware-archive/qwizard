@@ -21,6 +21,11 @@ import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * Wizard Step to set the Context of the new experiment and sample creation
+ * @author Andreas Friedrich
+ *
+ */
 public class ProjectContextStep implements WizardStep {
 
   private VerticalLayout main;
@@ -44,6 +49,10 @@ public class ProjectContextStep implements WizardStep {
   Button jump;
   boolean jumpAllowed = false;
 
+  /**
+   * Create a new Context Step for the wizard
+   * @param openbisSpaces List of Spaces to select from in the openBIS instance
+   */
   public ProjectContextStep(List<String> openbisSpaces) {
     main = new VerticalLayout();
     main.setMargin(true);

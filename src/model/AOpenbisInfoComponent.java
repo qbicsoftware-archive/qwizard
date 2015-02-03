@@ -2,10 +2,15 @@ package model;
 
 import com.vaadin.ui.AbstractField;
 
-@SuppressWarnings("serial")
+/**
+ * Abstract UI component of a Component containing rollover text and other information
+ * @author Andreas Friedrich
+ *
+ */
 abstract public class AOpenbisInfoComponent extends AbstractField<Object> {
 		
-	AbstractField<?> inner;
+  private static final long serialVersionUID = 377809399988492626L;
+  AbstractField<?> inner;
 	
 	public AOpenbisInfoComponent(String description, AbstractField<?> comp) {
 		this.setDescription(description);

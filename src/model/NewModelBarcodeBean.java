@@ -2,6 +2,11 @@ package model;
 
 import java.util.List;
 
+/**
+ * Bean item representing identifier, secondary name, a list of parent samples and sample type of samples to visualize in a table etc.
+ * @author Andreas Friedrich
+ *
+ */
 public class NewModelBarcodeBean implements IBarcodeBean {
 
   String Code;

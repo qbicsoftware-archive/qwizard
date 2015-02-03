@@ -6,6 +6,11 @@ import java.util.Map;
 
 import properties.Factor;
 
+/**
+ * Abstract class to represent different samples and their metadata
+ * @author Andreas Friedrich
+ *
+ */
 public abstract class AOpenbisSample {
 
   String sampleType;
@@ -15,6 +20,25 @@ public abstract class AOpenbisSample {
   List<Factor> factors;
   String Q_ADDITIONAL_NOTES;
   String parent;
+
+  /**
+   * Constructor of an abstract openbis sample
+   * @param code The sample code of the sample
+   * @param experiment The experiment the sample is attached to
+   * @param secondaryName A secondary name the sample might have
+   * @param additionalNotes Free text additional notes
+   * @param factors A list of conditions of this sample
+   * @param parent A parent sample code this sample is attached to
+   */
+  AOpenbisSample(String code, String experiment, String secondaryName, String additionalNotes,
+      List<Factor> factors, String parent) {
+    this.code = code;
+    this.experiment = experiment;
+    this.Q_ADDITIONAL_NOTES = additionalNotes;
+    this.Q_SECONDARY_NAME = secondaryName;
+    this.factors = factors;
+    this.parent = parent;
+  }
 
   public void setSampleType(String sampleType) {
     this.sampleType = sampleType;
@@ -43,17 +67,11 @@ public abstract class AOpenbisSample {
   public void setParent(String parent) {
     this.parent = parent;
   }
-
-  AOpenbisSample(String code, String experiment, String secondaryName, String additionalNotes,
-      List<Factor> factors, String parent) {
-    this.code = code;
-    this.experiment = experiment;
-    this.Q_ADDITIONAL_NOTES = additionalNotes;
-    this.Q_SECONDARY_NAME = secondaryName;
-    this.factors = factors;
-    this.parent = parent;
-  }
-
+  
+  /**
+   * Returns a map of all metadata fields and values of this sample
+   * @return
+   */
   public Map<String, String> getValueMap() {
     Map<String, String> res = new HashMap<String, String>();
     res.put("EXPERIMENT", experiment);
@@ -66,15 +84,19 @@ public abstract class AOpenbisSample {
     return res;
   }
 
+  /**
+   * Parses XML properties to the right format
+   * @param map
+   */
   private void fillInFactors(Map<String, String> map) {
     String res = "";
     for (Factor f : factors) {
       res += f.getLabel() + ": " + f.getValue(); //TODO null should be empty list
       if (f.hasUnit())
         res += ":" + f.getUnit();
-      res += ";";
+      res += "; ";
     }
-    res = res.substring(0, Math.max(res.length()-1,0));
+    res = res.substring(0, Math.max(res.length()-2,0));
     map.put("XML_FACTORS",res);
   }
 
@@ -96,5 +118,9 @@ public abstract class AOpenbisSample {
 
   public String getParent() {
     return parent;
+  }
+  
+  public String toString() {
+    return sampleType + " " + code + " " + Q_SECONDARY_NAME;
   }
 }

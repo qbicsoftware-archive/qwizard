@@ -12,6 +12,11 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * Wizard Step to put in information about the Sample Preparation that leads to a list of Test Samples
+ * @author Andreas Friedrich
+ *
+ */
 public class TestStep implements WizardStep {
 
   private VerticalLayout main;
@@ -22,6 +27,10 @@ public class TestStep implements WizardStep {
 
   boolean skip = false;
 
+  /**
+   * Create a new Sample Preparation step for the wizard
+   * @param sampleTypes Available list of sample types, e.g. Proteins, RNA etc.
+   */
   public TestStep(List<String> sampleTypes) {
     main = new VerticalLayout();
     main.setMargin(true);

@@ -2,10 +2,16 @@ package model;
 
 import com.vaadin.ui.TextArea;
 
-@SuppressWarnings("serial")
+/**
+ * Composite UI component of a TextArea containing rollover text and other information
+ * @author Andreas Friedrich
+ *
+ */
 public class OpenbisInfoTextArea  extends AOpenbisInfoComponent {
 
-	public OpenbisInfoTextArea(String label, String description) {
+  private static final long serialVersionUID = -2810188120490576124L;
+
+  public OpenbisInfoTextArea(String label, String description) {
 		super(description, new TextArea(label));
 	}
 	

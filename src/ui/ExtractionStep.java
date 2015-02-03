@@ -19,6 +19,12 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * Wizard Step to model the extraction of biological samples from entities
+ * 
+ * @author Andreas Friedrich
+ * 
+ */
 public class ExtractionStep implements WizardStep {
 
   boolean skip = false;
@@ -43,17 +49,22 @@ public class ExtractionStep implements WizardStep {
   public ConditionsPanel getCondPanel() {
     return c;
   }
-  
+
   public OptionGroup conditionsSet() {
     return conditionsSet;
   }
 
+  /**
+   * Create a new Extraction step for the wizard
+   * 
+   * @param tissueMap A map of available tissues (codes and labels)
+   */
   public ExtractionStep(Map<String, String> tissueMap) {
     main = new VerticalLayout();
     main.setMargin(true);
     main.setSpacing(true);
     main.addComponent(new Label("Are there different types of sample preparation?"));
-    
+
     this.tissueMap = tissueMap;
     ArrayList<String> tissues = new ArrayList<String>();
     tissues.addAll(tissueMap.keySet());
@@ -61,9 +72,11 @@ public class ExtractionStep implements WizardStep {
     tissue =
         new OpenbisInfoComboBox("Tissue",
             "If different tissues are a study condition, leave this empty", tissues);
-    c = new ConditionsPanel(suggestions, emptyFactor, "Tissue", (ComboBox) tissue.getInnerComponent(), true, conditionsSet);
+    c =
+        new ConditionsPanel(suggestions, emptyFactor, "Tissue",
+            (ComboBox) tissue.getInnerComponent(), true, conditionsSet);
     main.addComponent(c);
-    
+
     tissueNum =
         new OpenbisInfoTextField("How many different tissues are there in this sample extraction?",
             "", "25px", "2");
@@ -110,7 +123,7 @@ public class ExtractionStep implements WizardStep {
   public boolean onBack() {
     return true;
   }
-  
+
   public boolean tissueIsFactor() {
     return !tissue.getInnerComponent().isEnabled();
   }
@@ -122,7 +135,7 @@ public class ExtractionStep implements WizardStep {
     if (!enable)
       tissue.getInnerComponent().setValue(null);
   }
-  
+
   public List<String> getFactors() {
     return c.getConditions();
   }

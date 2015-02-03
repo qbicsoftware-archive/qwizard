@@ -16,7 +16,12 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
-public class FactorStep implements WizardStep {
+/**
+ * Wizard Step to select what experimental conditions can be distinguished at a step of the sample preparation
+ * @author Andreas Friedrich
+ *
+ */
+public class ConditionInstanceStep implements WizardStep {
 
   boolean skip = false;
 
@@ -27,7 +32,13 @@ public class FactorStep implements WizardStep {
   String optionName;
   String stepName;
   
-  public FactorStep(Set<String> options, String optionName, String stepName) {
+  /**
+   * Create a new Condition Step for the wizard
+   * @param options Set of different conditions available
+   * @param optionName Title of the options selection
+   * @param stepName Title of this step
+   */
+  public ConditionInstanceStep(Set<String> options, String optionName, String stepName) {
     main = new VerticalLayout();
     main.setSpacing(true);
     main.setMargin(true);

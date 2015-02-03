@@ -23,6 +23,11 @@ import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * View class for the Sample Sheet and Barcode pdf creation
+ * @author Andreas Friedrich
+ *
+ */
 public class BarcodeView extends VerticalLayout {
 
   private ComboBox spaceBox;
@@ -38,6 +43,10 @@ public class BarcodeView extends VerticalLayout {
 
   private GridLayout grid;
 
+  /**
+   * Creates a new component view for barcode creation
+   * @param spaces List of available openBIS spaces
+   */
   public BarcodeView(List<String> spaces) {
     setSpacing(true);
     setMargin(true);
@@ -93,9 +102,8 @@ public class BarcodeView extends VerticalLayout {
     resetButton = new Button("Reset Selection");
     resetButton.setEnabled(false);
     comparators = new OptionGroup("Sort Sheet by");
-    Comparator desc = SampleDescriptionComparator.getInstance();
-    Comparator id = SampleCodeComparator.getInstance();
     comparators.addItems(SortBy.values());
+    comparators.setValue(SortBy.DESCRIPTION);
     addComponent(comparators);
     addComponent(sheetDownloadButton);
     addComponent(pdfDownloadButton);
@@ -196,8 +204,11 @@ public class BarcodeView extends VerticalLayout {
     return info;
   }
 
-  public void enableCreation(boolean enable) {
+  public void newExperimentSelected(boolean enable) {
     prepareButton.setEnabled(enable);
+    sheetDownloadButton.setEnabled(!enable);
+    pdfDownloadButton.setEnabled(!enable);
+    resetButton.setEnabled(!enable);
   }
 
   public SortBy getSorter() {

@@ -7,14 +7,28 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * Composite UI component to choose a single condition of an experiment
+ * @author Andreas Friedrich
+ *
+ */
 public class ConditionChooser extends VerticalLayout {
 
+  private static final long serialVersionUID = 7196121933289471757L;
   private ComboBox chooser;
   private String other;
   private String special;
   private boolean isSpecial;
   private TextField freetext;
 
+  /**
+   * Creates a new condition chooser component
+   * @param options List of different possible conditions
+   * @param other Name of the "other" condition, which when selected will enable an input field for free text
+   * @param special Name of a "special" condition like species for the entity input, which when selected will disable the normal species input
+   * because there is more than one instance
+   * @param nullSelectionAllowed true, if the conditions may be empty
+   */
   public ConditionChooser(List<String> options, String other, String special,
       boolean nullSelectionAllowed) {
     isSpecial = false;

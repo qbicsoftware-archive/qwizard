@@ -1,10 +1,7 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import ch.systemsx.cisd.openbis.generic.shared.api.v1.dto.Experiment;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -15,8 +12,15 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.OptionGroup;
 
+/**
+ * Composite UI component for inputting an arbitrary number of experimental conditions
+ * 
+ * @author Andreas Friedrich
+ * 
+ */
 public class ConditionsPanel extends HorizontalLayout {
 
+  private static final long serialVersionUID = -1578503116738309380L;
   List<String> options;
   String other;
   String special;
@@ -31,6 +35,16 @@ public class ConditionsPanel extends HorizontalLayout {
 
   OptionGroup conditionsSet;
 
+  /**
+   * Create a new Conditions Panel component to select experimental conditions
+   * @param options List of different possible conditions
+   * @param other Name of the "other" condition, which when selected will enable an input field for free text
+   * @param special Name of a "special" condition like species for the entity input, which when selected will disable the normal species input
+   * because there is more than one instance
+   * @param specialField the ComboBox containing the options of the special field, will be disabled when special is chosen as a condition
+   * @param nullSelectionAllowed true, if the conditions may be empty
+   * @param conditionsSet (empty) option group that makes it possible to listen to the conditions inside this component from the outside
+   */
   public ConditionsPanel(List<String> options, String other, String special, ComboBox specialField,
       boolean nullSelectionAllowed, OptionGroup conditionsSet) {
     this.specialField = specialField;
@@ -67,6 +81,8 @@ public class ConditionsPanel extends HorizontalLayout {
   private void initListener() {
     conditionChangeListener = new ValueChangeListener() {
 
+      private static final long serialVersionUID = 1521218807043139513L;
+
       @Override
       public void valueChange(ValueChangeEvent event) {
         ComboBox source = (ComboBox) event.getProperty();
@@ -85,6 +101,8 @@ public class ConditionsPanel extends HorizontalLayout {
     };
 
     buttonListener = new Button.ClickListener() {
+
+      private static final long serialVersionUID = 2240224129259577437L;
 
       @Override
       public void buttonClick(ClickEvent event) {

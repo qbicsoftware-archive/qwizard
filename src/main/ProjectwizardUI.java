@@ -60,10 +60,13 @@ public class ProjectwizardUI extends UI {
   @Override
   protected void init(VaadinRequest request) {
     VerticalLayout layout = new VerticalLayout();
+    //read in the configuration file
     readConfig();
+    //establish connection to the OpenBIS API
     this.openbis = new OpenBisClient(dataSourceUser, dataSourcePass, dataSourceURL, true);
     layout.setMargin(true);
     setContent(layout);
+    //initialize the View with sample types, spaces and the dictionaries of tissues and species
     initView(openbis.getVocabCodesAndLabelsForVocab("Q_NCBI_TAXONOMY"),
         openbis.getVocabCodesAndLabelsForVocab("Q_PRIMARY_TISSUES"),
         openbis.getVocabCodesForVocab("Q_SAMPLE_TYPES"), openbis.listSpaces());
@@ -104,8 +107,10 @@ public class ProjectwizardUI extends UI {
   private void readConfig() {
     Properties config = new Properties();
     try {
+//      config.load(new FileReader("/home/rayslife/portlet.properties"));
       config.load(new FileReader("/Users/frieda/Desktop/portlet.properties"));
 //      config.load(new FileReader("/home/kenar/JavaDev/portlets.properties"));
+//      config.load(new FileReader("/home-link/qeana10/portlets.properties"));
       StringWriter configDebug = new StringWriter();
       config.list(new PrintWriter(configDebug));
       //test
