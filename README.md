@@ -1,2 +1,2 @@
 Project is now found here:
-https://github.com/qbicsoftware/projectwizard/
+https://github.com/qbicsoftware/projectwizard-portlet/
